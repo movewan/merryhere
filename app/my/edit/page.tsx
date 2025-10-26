@@ -52,6 +52,89 @@ export default function EditProfilePage() {
     loadProfile();
   }, []);
 
+  // 네이티브 이벤트 리스너 설정 (React의 합성 이벤트 우회)
+  useEffect(() => {
+    const input = fileInputRef.current;
+    if (!input) return;
+
+    const handleNativeChange = (e: Event) => {
+      console.log("=== Native change event fired ===");
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+
+      if (!file) {
+        console.log("No file in native event");
+        return;
+      }
+
+      console.log("File from native event:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
+
+      // 파일 타입 체크
+      if (!file.type.startsWith("image/")) {
+        console.error("Invalid file type:", file.type);
+        toast({
+          title: "파일 형식 오류",
+          description: "이미지 파일만 업로드 가능합니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 파일 크기 체크 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        console.error("File size too large:", file.size);
+        toast({
+          title: "파일 크기 초과",
+          description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Starting FileReader in native event handler...");
+
+      setSelectedFile(file);
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        console.log("FileReader onload - success!");
+        if (reader.result) {
+          setSelectedImage(reader.result as string);
+          setShowCropModal(true);
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        }
+      };
+
+      reader.onerror = () => {
+        console.error("FileReader error in native handler:", reader.error);
+        toast({
+          title: "파일 읽기 오류",
+          description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.name || '알 수 없는 오류'})`,
+          variant: "destructive",
+        });
+      };
+
+      console.log("Calling readAsDataURL in native handler...");
+      reader.readAsDataURL(file);
+    };
+
+    // 네이티브 change 이벤트 리스너 추가
+    input.addEventListener('change', handleNativeChange);
+    console.log("Native change event listener added");
+
+    return () => {
+      input.removeEventListener('change', handleNativeChange);
+      console.log("Native change event listener removed");
+    };
+  }, [toast]);
+
   const loadProfile = async () => {
     setLoading(true);
     try {
@@ -429,7 +512,6 @@ export default function EditProfilePage() {
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  onChange={handleImageChange}
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
                   JPG, PNG 형식 (최대 5MB)
