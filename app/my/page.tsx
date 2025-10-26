@@ -15,16 +15,9 @@ export default async function MyPage() {
 
   const profile = await getProfile(user.id);
 
+  // 프로필이 없으면 편집 페이지로 리다이렉트
   if (!profile) {
-    return (
-      <main className="min-h-screen py-8">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="rounded-lg bg-red-50 p-8 text-center">
-            <p className="text-red-600">프로필 정보를 찾을 수 없습니다.</p>
-          </div>
-        </div>
-      </main>
-    );
+    redirect("/my/edit");
   }
 
   // 대표자 또는 매니저 권한 확인
