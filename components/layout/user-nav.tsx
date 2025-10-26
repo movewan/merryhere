@@ -80,8 +80,11 @@ export function UserNav({ user, profile }: UserNavProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-red-600 focus:text-red-600"
-          onClick={handleLogout}
+          className="text-red-600 focus:text-red-600 cursor-pointer"
+          onSelect={(e) => {
+            e.preventDefault();
+            handleLogout();
+          }}
         >
           로그아웃
         </DropdownMenuItem>
