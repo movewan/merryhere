@@ -47,12 +47,21 @@ export function Header() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Listen for profile updates (custom event)
+    const handleProfileUpdate = () => {
+      fetchUser();
+    };
+    window.addEventListener('profile-updated', handleProfileUpdate);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('profile-updated', handleProfileUpdate);
+    };
   }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container mx-auto px-4 md:px-6 flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold text-teal">MERRY HERE</span>

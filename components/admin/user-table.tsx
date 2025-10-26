@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, Coins } from "lucide-react";
 import type { Profile } from "@/lib/supabase/database.types";
 import { format, parseISO } from "date-fns";
@@ -47,12 +48,22 @@ export function UserTable({ users, onUpdate }: UserTableProps) {
     );
   }
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>프로필</TableHead>
               <TableHead>이름</TableHead>
               <TableHead>회원 유형</TableHead>
               <TableHead>역할</TableHead>
@@ -65,6 +76,14 @@ export function UserTable({ users, onUpdate }: UserTableProps) {
           <TableBody>
             {users.map((user) => (
               <TableRow key={user.id}>
+                <TableCell>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
+                    <AvatarFallback className="bg-teal/10 text-teal">
+                      {getInitials(user.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </TableCell>
                 <TableCell className="font-medium">{user.full_name}</TableCell>
                 <TableCell>
                   <span

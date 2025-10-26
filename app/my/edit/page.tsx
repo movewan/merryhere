@@ -55,41 +55,19 @@ export default function EditProfilePage() {
   // 네이티브 이벤트 리스너 설정 (React의 합성 이벤트 우회)
   useEffect(() => {
     // 로딩 중이거나 프로필이 없으면 대기
-    if (loading || !profile) {
-      console.log("Waiting for profile to load... loading:", loading, "profile:", !!profile);
-      return;
-    }
-
-    console.log("=== useEffect for file input running ===");
-    console.log("fileInputRef.current:", fileInputRef.current);
+    if (loading || !profile) return;
 
     const input = fileInputRef.current;
-    if (!input) {
-      console.error("fileInputRef.current is null!");
-      return;
-    }
-
-    console.log("Input element found:", input.id, input.type);
+    if (!input) return;
 
     const handleNativeChange = (e: Event) => {
-      console.log("=== Native change event fired ===");
       const target = e.target as HTMLInputElement;
       const file = target.files?.[0];
 
-      if (!file) {
-        console.log("No file in native event");
-        return;
-      }
-
-      console.log("File from native event:", {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-      });
+      if (!file) return;
 
       // 파일 타입 체크
       if (!file.type.startsWith("image/")) {
-        console.error("Invalid file type:", file.type);
         toast({
           title: "파일 형식 오류",
           description: "이미지 파일만 업로드 가능합니다.",
@@ -100,7 +78,6 @@ export default function EditProfilePage() {
 
       // 파일 크기 체크 (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        console.error("File size too large:", file.size);
         toast({
           title: "파일 크기 초과",
           description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
@@ -109,14 +86,11 @@ export default function EditProfilePage() {
         return;
       }
 
-      console.log("Starting FileReader in native event handler...");
-
       setSelectedFile(file);
 
       const reader = new FileReader();
 
       reader.onload = () => {
-        console.log("FileReader onload - success!");
         if (reader.result) {
           setSelectedImage(reader.result as string);
           setShowCropModal(true);
@@ -127,7 +101,6 @@ export default function EditProfilePage() {
       };
 
       reader.onerror = () => {
-        console.error("FileReader error in native handler:", reader.error);
         toast({
           title: "파일 읽기 오류",
           description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.name || '알 수 없는 오류'})`,
@@ -135,17 +108,14 @@ export default function EditProfilePage() {
         });
       };
 
-      console.log("Calling readAsDataURL in native handler...");
       reader.readAsDataURL(file);
     };
 
     // 네이티브 change 이벤트 리스너 추가
     input.addEventListener('change', handleNativeChange);
-    console.log("✅ Native change event listener added successfully");
 
     return () => {
       input.removeEventListener('change', handleNativeChange);
-      console.log("Native change event listener removed");
     };
   }, [loading, profile, toast]);
 
@@ -179,135 +149,6 @@ export default function EditProfilePage() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("=== handleImageChange called ===");
-
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      console.log("No file selected");
-      return;
-    }
-
-    const file = files[0];
-    console.log("File selected:", {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    });
-
-    // 파일 타입 체크
-    if (!file.type.startsWith("image/")) {
-      console.error("Invalid file type:", file.type);
-      toast({
-        title: "파일 형식 오류",
-        description: "이미지 파일만 업로드 가능합니다.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // 파일 크기 체크 (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      console.error("File size too large:", file.size);
-      toast({
-        title: "파일 크기 초과",
-        description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log("Validation passed, starting FileReader immediately...");
-
-    // 원본 File 객체를 저장
-    setSelectedFile(file);
-
-    // FileReader를 즉시 시작 (onChange 핸들러 내에서 동기적으로)
-    const reader = new FileReader();
-    console.log("FileReader created");
-
-    reader.onloadstart = () => {
-      console.log("FileReader: onloadstart");
-    };
-
-    reader.onprogress = (e) => {
-      console.log("FileReader: onprogress", {
-        loaded: e.loaded,
-        total: e.total,
-        percent: e.total > 0 ? (e.loaded / e.total * 100).toFixed(2) + '%' : 'unknown'
-      });
-    };
-
-    reader.onload = (e) => {
-      console.log("FileReader: onload success");
-      console.log("Result length:", reader.result?.toString().length);
-
-      if (reader.result) {
-        const resultStr = reader.result as string;
-        console.log("Data URL prefix:", resultStr.substring(0, 50));
-        setSelectedImage(resultStr);
-        setShowCropModal(true);
-        console.log("Modal should now be visible");
-
-        // 파일 읽기 성공 후 input 리셋 (같은 파일 재선택 가능하도록)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-          console.log("Input reset after successful file read");
-        }
-      } else {
-        console.error("No result from FileReader");
-      }
-    };
-
-    reader.onerror = (e) => {
-      console.error("FileReader: onerror");
-      console.error("Error object:", reader.error);
-
-      // 에러 정보를 가능한 모든 방법으로 출력
-      if (reader.error) {
-        console.error("Error.name:", reader.error.name);
-        console.error("Error.message:", reader.error.message);
-        console.error("Error.code:", (reader.error as any).code);
-        console.error("Error stringified:", JSON.stringify(reader.error, null, 2));
-      }
-
-      console.error("Event:", e);
-      console.error("Event type:", e.type);
-      console.error("File info at error:", {
-        name: file.name,
-        size: file.size,
-        type: file.type
-      });
-
-      toast({
-        title: "파일 읽기 오류",
-        description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.name || '알 수 없는 오류'})`,
-        variant: "destructive",
-      });
-      setSelectedFile(null);
-    };
-
-    reader.onabort = () => {
-      console.error("FileReader: onabort - reading was aborted");
-    };
-
-    reader.onloadend = () => {
-      console.log("FileReader: onloadend (always called)");
-    };
-
-    try {
-      console.log("Starting readAsDataURL on File directly...");
-      reader.readAsDataURL(file);
-      console.log("readAsDataURL called successfully");
-    } catch (error) {
-      console.error("Exception when calling readAsDataURL:", error);
-      toast({
-        title: "파일 읽기 오류",
-        description: "이미지 파일을 읽을 수 없습니다.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleCropComplete = (blob: Blob) => {
     try {
@@ -376,6 +217,8 @@ export default function EditProfilePage() {
           title: "저장 완료",
           description: "프로필이 성공적으로 업데이트되었습니다.",
         });
+        // Trigger profile update event for header refresh
+        window.dispatchEvent(new Event('profile-updated'));
         router.push("/my");
       } else {
         toast({

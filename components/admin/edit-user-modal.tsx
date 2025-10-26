@@ -24,6 +24,7 @@ import type { Profile } from "@/lib/supabase/database.types";
 import { updateUserAsAdmin } from "@/lib/supabase/admin";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatPhoneNumber, unformatPhoneNumber } from "@/lib/utils/phone";
 
 interface EditUserModalProps {
@@ -58,6 +59,15 @@ const jobTypeLabels = {
 export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   // 기본 정보 (전화번호는 포맷팅하여 표시)
   const [fullName, setFullName] = useState(user.full_name);
@@ -174,7 +184,18 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>회원 정보 수정</DialogTitle>
+          <DialogTitle className="flex items-center gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={profileImageUrl || undefined} alt={fullName} />
+              <AvatarFallback className="bg-teal/10 text-teal">
+                {getInitials(fullName)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div>회원 정보 수정</div>
+              <div className="text-sm font-normal text-muted-foreground">{fullName}</div>
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
