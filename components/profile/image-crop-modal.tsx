@@ -101,7 +101,10 @@ export function ImageCropModal({
   );
 
   const handleComplete = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels) {
+      console.warn("No cropped area selected");
+      return;
+    }
 
     setProcessing(true);
     try {
@@ -109,7 +112,7 @@ export function ImageCropModal({
       onComplete(croppedBlob);
     } catch (error) {
       console.error("Error cropping image:", error);
-    } finally {
+      alert("이미지를 편집하는 중 오류가 발생했습니다. 다시 시도해주세요.");
       setProcessing(false);
     }
   };

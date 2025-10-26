@@ -20,7 +20,7 @@ import type { Profile } from "@/lib/supabase/database.types";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { ImageCropModal } from "@/components/profile/image-crop-modal";
-import { formatPhoneNumber } from "@/lib/utils/phone";
+import { formatPhoneNumber, unformatPhoneNumber } from "@/lib/utils/phone";
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -63,7 +63,8 @@ export default function EditProfilePage() {
       if (profileData) {
         setProfile(profileData);
         setFullName(profileData.full_name);
-        setPhone(profileData.phone || "");
+        // 전화번호는 포맷팅하여 표시
+        setPhone(profileData.phone ? formatPhoneNumber(profileData.phone) : "");
         setCompanyName(profileData.company_name || "");
         setPreviewUrl(profileData.profile_image_url || null);
       }
@@ -81,35 +82,80 @@ export default function EditProfilePage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // 파일 크기 체크 (5MB)
-      if (file.size > 5 * 1024 * 1024) {
+    if (!file) return;
+
+    // 파일 타입 체크
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "파일 형식 오류",
+        description: "이미지 파일만 업로드 가능합니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 파일 크기 체크 (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "파일 크기 초과",
+        description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        if (reader.result) {
+          setSelectedImage(reader.result as string);
+          setShowCropModal(true);
+        }
+      };
+
+      reader.onerror = () => {
         toast({
-          title: "파일 크기 초과",
-          description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
+          title: "파일 읽기 오류",
+          description: "이미지 파일을 읽을 수 없습니다.",
           variant: "destructive",
         });
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result as string);
-        setShowCropModal(true);
       };
+
       reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Error reading file:", error);
+      toast({
+        title: "파일 읽기 오류",
+        description: "이미지 파일을 읽을 수 없습니다.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleCropComplete = (blob: Blob) => {
-    setCroppedBlob(blob);
+    try {
+      setCroppedBlob(blob);
 
-    // 미리보기 URL 생성
-    const url = URL.createObjectURL(blob);
-    setPreviewUrl(url);
+      // 이전 미리보기 URL 정리
+      if (previewUrl && previewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(previewUrl);
+      }
 
-    setShowCropModal(false);
-    setSelectedImage(null);
+      // 새 미리보기 URL 생성
+      const url = URL.createObjectURL(blob);
+      setPreviewUrl(url);
+
+      setShowCropModal(false);
+      setSelectedImage(null);
+    } catch (error) {
+      console.error("Error handling crop:", error);
+      toast({
+        title: "이미지 처리 오류",
+        description: "이미지를 처리하는 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,10 +186,10 @@ export default function EditProfilePage() {
         }
       }
 
-      // 프로필 정보 업데이트
+      // 프로필 정보 업데이트 (전화번호는 하이픈 제거 후 저장)
       const result = await updateProfile(profile.id, {
         full_name: fullName,
-        phone: phone || null,
+        phone: phone ? unformatPhoneNumber(phone) : null,
         company_name: companyName || null,
       });
 
@@ -302,6 +348,10 @@ export default function EditProfilePage() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleImageChange}
+                  onClick={(e) => {
+                    // Reset input value to allow selecting the same file again
+                    (e.target as HTMLInputElement).value = "";
+                  }}
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
                   JPG, PNG 형식 (최대 5MB)

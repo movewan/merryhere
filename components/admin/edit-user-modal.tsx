@@ -24,7 +24,7 @@ import type { Profile } from "@/lib/supabase/database.types";
 import { updateUserAsAdmin } from "@/lib/supabase/admin";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPhoneNumber } from "@/lib/utils/phone";
+import { formatPhoneNumber, unformatPhoneNumber } from "@/lib/utils/phone";
 
 interface EditUserModalProps {
   user: Profile;
@@ -59,9 +59,9 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
-  // 기본 정보
+  // 기본 정보 (전화번호는 포맷팅하여 표시)
   const [fullName, setFullName] = useState(user.full_name);
-  const [phone, setPhone] = useState(user.phone || "");
+  const [phone, setPhone] = useState(user.phone ? formatPhoneNumber(user.phone) : "");
   const [birthDate, setBirthDate] = useState(user.birth_date || "");
   const [snsUrl, setSnsUrl] = useState(user.sns_url || "");
   const [profileImageUrl, setProfileImageUrl] = useState(user.profile_image_url || "");
@@ -110,9 +110,9 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
     setSaving(true);
     try {
       const result = await updateUserAsAdmin(user.id, {
-        // 기본 정보
+        // 기본 정보 (전화번호는 하이픈 제거 후 저장)
         full_name: fullName,
-        phone: phone || null,
+        phone: phone ? unformatPhoneNumber(phone) : null,
         birth_date: birthDate || null,
         sns_url: snsUrl || null,
         profile_image_url: profileImageUrl || null,
