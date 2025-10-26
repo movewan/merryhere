@@ -168,7 +168,7 @@ export function InquirySection() {
                   <div>
                     <div className="mb-1 font-semibold">방문 상담</div>
                     <p className="text-muted-foreground">
-                      서울시 용산구 한강대로 405
+                      서울시 성동구 성수동2가
                       <br />
                       평일 10:00 - 18:00 (사전 예약 필수)
                     </p>

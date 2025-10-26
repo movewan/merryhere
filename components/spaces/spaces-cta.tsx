@@ -33,8 +33,8 @@ export function SpacesCTA() {
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              variant="secondary"
+              className="bg-white text-teal hover:bg-gray-100"
             >
               <Link href="/rooms">
                 <Calendar className="mr-2 h-5 w-5" />
@@ -44,10 +44,10 @@ export function SpacesCTA() {
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              variant="secondary"
+              className="bg-white text-teal hover:bg-gray-100"
             >
-              <Link href="mailto:hello@merryhere.kr">
+              <Link href="mailto:merryhere@mysc.co.kr">
                 <Mail className="mr-2 h-5 w-5" />
                 문의하기
               </Link>

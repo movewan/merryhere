@@ -66,12 +66,12 @@ export function HeroSection() {
               <div className="space-y-1">
                 <p className="text-sm text-white/70">위치</p>
                 <p className="text-lg font-semibold text-white">
-                  서울 용산구 한강대로
+                  서울 성동구 성수동2가
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-white/70">면적</p>
-                <p className="text-lg font-semibold text-white">약 500평</p>
+                <p className="text-lg font-semibold text-white">약 2270 제곱미터</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-white/70">운영</p>
