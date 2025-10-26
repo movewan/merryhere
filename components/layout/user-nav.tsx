@@ -79,14 +79,14 @@ export function UserNav({ user, profile }: UserNavProps) {
           <Link href="/programs">프로그램</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <form action={logout}>
           <button
-            onClick={handleLogout}
-            className="w-full text-red-600 focus:text-red-600"
+            type="submit"
+            className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground text-red-600"
           >
             로그아웃
           </button>
-        </DropdownMenuItem>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   );
