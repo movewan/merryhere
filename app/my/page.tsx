@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/auth/actions";
-import { getProfile } from "@/lib/supabase/profile";
+import { createClient } from "@/lib/supabase/server";
 import { ProfileCard } from "@/components/my/profile-card";
 import { PointsDashboard } from "@/components/my/points-dashboard";
 import { ActivityHistory } from "@/components/my/activity-history";
@@ -13,7 +13,13 @@ export default async function MyPage() {
     redirect("/auth/login");
   }
 
-  const profile = await getProfile(user.id);
+  // Get profile using server client
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   // 프로필이 없으면 편집 페이지로 리다이렉트
   if (!profile) {
