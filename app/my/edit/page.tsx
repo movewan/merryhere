@@ -19,6 +19,8 @@ import {
 import type { Profile } from "@/lib/supabase/database.types";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { ImageCropModal } from "@/components/profile/image-crop-modal";
+import { formatPhoneNumber } from "@/lib/utils/phone";
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -32,8 +34,12 @@ export default function EditProfilePage() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // 이미지 크롭 관련
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
 
   // 비밀번호 변경 데이터
   const [newPassword, setNewPassword] = useState("");
@@ -76,13 +82,39 @@ export default function EditProfilePage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setProfileImage(file);
+      // 파일 크기 체크 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "파일 크기 초과",
+          description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
+        setSelectedImage(reader.result as string);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (blob: Blob) => {
+    setCroppedBlob(blob);
+
+    // 미리보기 URL 생성
+    const url = URL.createObjectURL(blob);
+    setPreviewUrl(url);
+
+    setShowCropModal(false);
+    setSelectedImage(null);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhone(formatted);
   };
 
   const handleSaveProfile = async () => {
@@ -90,9 +122,13 @@ export default function EditProfilePage() {
 
     setSaving(true);
     try {
-      // 프로필 이미지 업로드
-      if (profileImage) {
-        const result = await uploadProfileImage(profile.id, profileImage);
+      // 크롭된 프로필 이미지 업로드
+      if (croppedBlob) {
+        const file = new File([croppedBlob], `profile-${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
+
+        const result = await uploadProfileImage(profile.id, file);
         if (!result.success) {
           toast({
             title: "이미지 업로드 실패",
@@ -270,6 +306,9 @@ export default function EditProfilePage() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   JPG, PNG 형식 (최대 5MB)
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  업로드 후 1:1 비율로 편집할 수 있습니다
+                </p>
               </div>
             </div>
 
@@ -292,8 +331,9 @@ export default function EditProfilePage() {
               <Input
                 id="phone"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={handlePhoneChange}
                 placeholder="010-0000-0000"
+                maxLength={13}
               />
             </div>
 
@@ -380,6 +420,18 @@ export default function EditProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 이미지 크롭 모달 */}
+      {showCropModal && selectedImage && (
+        <ImageCropModal
+          image={selectedImage}
+          onClose={() => {
+            setShowCropModal(false);
+            setSelectedImage(null);
+          }}
+          onComplete={handleCropComplete}
+        />
+      )}
     </main>
   );
 }

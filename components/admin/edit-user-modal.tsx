@@ -24,6 +24,7 @@ import type { Profile } from "@/lib/supabase/database.types";
 import { updateUserAsAdmin } from "@/lib/supabase/admin";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPhoneNumber } from "@/lib/utils/phone";
 
 interface EditUserModalProps {
   user: Profile;
@@ -206,7 +207,8 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
                 type="tel"
                 placeholder="010-1234-5678"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(formatPhoneNumber(e.target.value))}
+                maxLength={13}
               />
             </div>
 
