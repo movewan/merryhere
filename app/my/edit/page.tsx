@@ -101,6 +101,7 @@ export default function EditProfilePage() {
         description: "이미지 파일만 업로드 가능합니다.",
         variant: "destructive",
       });
+      e.target.value = ""; // Reset input
       return;
     }
 
@@ -112,6 +113,7 @@ export default function EditProfilePage() {
         description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
         variant: "destructive",
       });
+      e.target.value = ""; // Reset input
       return;
     }
 
@@ -122,6 +124,8 @@ export default function EditProfilePage() {
       if (reader.result) {
         setSelectedImage(reader.result as string);
         setShowCropModal(true);
+        // 파일 읽기 성공 후 input 리셋 (같은 파일 재선택 가능하도록)
+        e.target.value = "";
       } else {
         console.error("No result from FileReader");
       }
@@ -134,10 +138,12 @@ export default function EditProfilePage() {
         description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.message || "알 수 없는 오류"})`,
         variant: "destructive",
       });
+      e.target.value = ""; // Reset input on error
     };
 
     reader.onabort = () => {
       console.error("FileReader aborted");
+      e.target.value = ""; // Reset input on abort
     };
 
     try {
@@ -149,6 +155,7 @@ export default function EditProfilePage() {
         description: "이미지 파일을 읽을 수 없습니다.",
         variant: "destructive",
       });
+      e.target.value = ""; // Reset input on error
     }
   };
 
@@ -367,10 +374,6 @@ export default function EditProfilePage() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleImageChange}
-                  onClick={(e) => {
-                    // Reset input value to allow selecting the same file again
-                    (e.target as HTMLInputElement).value = "";
-                  }}
                 />
                 <p className="mt-2 text-xs text-muted-foreground">
                   JPG, PNG 형식 (최대 5MB)
