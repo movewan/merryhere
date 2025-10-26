@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { formatPhoneNumber, unformatPhoneNumber } from "@/lib/utils/phone";
 export default function EditProfilePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,9 +124,20 @@ export default function EditProfilePage() {
 
     // File을 새로운 Blob으로 복사 (원본 파일과 독립적)
     const fileBlob = new Blob([file], { type: file.type });
-    console.log("Blob created from file");
+    console.log("Blob created from file, size:", fileBlob.size, "type:", fileBlob.type);
 
-    // Blob을 저장
+    // Blob 크기 검증
+    if (fileBlob.size === 0) {
+      console.error("Blob size is 0! File copy failed");
+      toast({
+        title: "파일 처리 오류",
+        description: "파일을 복사하는 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 원본 File 객체를 저장 (참조 유지)
     setSelectedFile(file);
 
     // FileReader로 Data URL 생성 (Blob 사용)
@@ -154,6 +166,12 @@ export default function EditProfilePage() {
         setSelectedImage(resultStr);
         setShowCropModal(true);
         console.log("Modal should now be visible");
+
+        // 파일 읽기 성공 후 input 리셋 (같은 파일 재선택 가능하도록)
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+          console.log("Input reset after successful file read");
+        }
       } else {
         console.error("No result from FileReader");
       }
@@ -420,6 +438,7 @@ export default function EditProfilePage() {
                   이미지 업로드
                 </Label>
                 <Input
+                  ref={fileInputRef}
                   id="profile-image"
                   type="file"
                   accept="image/*"
