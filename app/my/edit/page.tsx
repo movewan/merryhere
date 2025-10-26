@@ -54,6 +54,12 @@ export default function EditProfilePage() {
 
   // 네이티브 이벤트 리스너 설정 (React의 합성 이벤트 우회)
   useEffect(() => {
+    // 로딩 중이거나 프로필이 없으면 대기
+    if (loading || !profile) {
+      console.log("Waiting for profile to load... loading:", loading, "profile:", !!profile);
+      return;
+    }
+
     console.log("=== useEffect for file input running ===");
     console.log("fileInputRef.current:", fileInputRef.current);
 
@@ -141,7 +147,7 @@ export default function EditProfilePage() {
       input.removeEventListener('change', handleNativeChange);
       console.log("Native change event listener removed");
     };
-  }, [toast]);
+  }, [loading, profile, toast]);
 
   const loadProfile = async () => {
     setLoading(true);
