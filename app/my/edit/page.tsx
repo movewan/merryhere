@@ -117,39 +117,18 @@ export default function EditProfilePage() {
       return;
     }
 
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      console.log("File loaded successfully");
-      if (reader.result) {
-        setSelectedImage(reader.result as string);
-        setShowCropModal(true);
-        // 파일 읽기 성공 후 input 리셋 (같은 파일 재선택 가능하도록)
-        e.target.value = "";
-      } else {
-        console.error("No result from FileReader");
-      }
-    };
-
-    reader.onerror = (error) => {
-      console.error("FileReader error:", error, reader.error);
-      toast({
-        title: "파일 읽기 오류",
-        description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.message || "알 수 없는 오류"})`,
-        variant: "destructive",
-      });
-      e.target.value = ""; // Reset input on error
-    };
-
-    reader.onabort = () => {
-      console.error("FileReader aborted");
-      e.target.value = ""; // Reset input on abort
-    };
-
     try {
-      reader.readAsDataURL(file);
+      // URL.createObjectURL 방식으로 변경 (권한 문제 해결)
+      const imageUrl = URL.createObjectURL(file);
+      console.log("Image URL created:", imageUrl);
+
+      setSelectedImage(imageUrl);
+      setShowCropModal(true);
+
+      // 파일 선택 완료 후 input 리셋 (같은 파일 재선택 가능하도록)
+      e.target.value = "";
     } catch (error) {
-      console.error("Error starting FileReader:", error);
+      console.error("Error creating object URL:", error);
       toast({
         title: "파일 읽기 오류",
         description: "이미지 파일을 읽을 수 없습니다.",
@@ -166,6 +145,11 @@ export default function EditProfilePage() {
       // 이전 미리보기 URL 정리
       if (previewUrl && previewUrl.startsWith("blob:")) {
         URL.revokeObjectURL(previewUrl);
+      }
+
+      // 원본 이미지 URL 정리 (크롭 완료 후 더 이상 필요 없음)
+      if (selectedImage && selectedImage.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedImage);
       }
 
       // 새 미리보기 URL 생성
@@ -498,6 +482,10 @@ export default function EditProfilePage() {
         <ImageCropModal
           image={selectedImage}
           onClose={() => {
+            // Blob URL 메모리 정리
+            if (selectedImage.startsWith("blob:")) {
+              URL.revokeObjectURL(selectedImage);
+            }
             setShowCropModal(false);
             setSelectedImage(null);
           }}
