@@ -100,7 +100,14 @@ export function Header() {
         {/* Auth Buttons */}
         <div className="flex items-center gap-4">
           {user && profile ? (
-            <UserNav user={user} profile={profile} />
+            <>
+              {profile.role === 'admin' && (
+                <Button asChild variant="outline" className="border-teal text-teal hover:bg-teal hover:text-white">
+                  <Link href="/admin">관리자 페이지</Link>
+                </Button>
+              )}
+              <UserNav user={user} profile={profile} />
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <Button variant="ghost" asChild>

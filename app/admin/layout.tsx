@@ -24,8 +24,9 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
+  // Redirect non-admin users to home page
   if (!profile || profile.role !== "admin") {
-    redirect("/");
+    redirect("/?error=unauthorized");
   }
 
   return (
