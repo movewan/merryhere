@@ -82,6 +82,8 @@ export default function EditProfilePage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("=== handleImageChange called ===");
+
     const file = e.target.files?.[0];
     if (!file) {
       console.log("No file selected");
@@ -92,6 +94,7 @@ export default function EditProfilePage() {
       name: file.name,
       type: file.type,
       size: file.size,
+      lastModified: file.lastModified,
     });
 
     // 파일 타입 체크
@@ -116,22 +119,50 @@ export default function EditProfilePage() {
       return;
     }
 
+    console.log("Validation passed, storing file and starting FileReader");
+
     // File 객체를 저장 (참조 유지)
     setSelectedFile(file);
 
     // FileReader로 Data URL 생성
     const reader = new FileReader();
+    console.log("FileReader created");
 
-    reader.onload = () => {
-      console.log("File loaded successfully");
+    reader.onloadstart = () => {
+      console.log("FileReader: onloadstart");
+    };
+
+    reader.onprogress = (e) => {
+      console.log("FileReader: onprogress", {
+        loaded: e.loaded,
+        total: e.total,
+        percent: e.total > 0 ? (e.loaded / e.total * 100).toFixed(2) + '%' : 'unknown'
+      });
+    };
+
+    reader.onload = (e) => {
+      console.log("FileReader: onload success");
+      console.log("Result length:", reader.result?.toString().length);
+
       if (reader.result) {
-        setSelectedImage(reader.result as string);
+        const resultStr = reader.result as string;
+        console.log("Data URL prefix:", resultStr.substring(0, 50));
+        setSelectedImage(resultStr);
         setShowCropModal(true);
+        console.log("Modal should now be visible");
+      } else {
+        console.error("No result from FileReader");
       }
     };
 
-    reader.onerror = () => {
-      console.error("FileReader error:", reader.error);
+    reader.onerror = (e) => {
+      console.error("FileReader: onerror");
+      console.error("Error details:", {
+        error: reader.error,
+        errorName: reader.error?.name,
+        errorMessage: reader.error?.message,
+        event: e
+      });
       toast({
         title: "파일 읽기 오류",
         description: "이미지 파일을 읽을 수 없습니다.",
@@ -140,7 +171,26 @@ export default function EditProfilePage() {
       setSelectedFile(null);
     };
 
-    reader.readAsDataURL(file);
+    reader.onabort = () => {
+      console.error("FileReader: onabort - reading was aborted");
+    };
+
+    reader.onloadend = () => {
+      console.log("FileReader: onloadend (always called)");
+    };
+
+    try {
+      console.log("Starting readAsDataURL...");
+      reader.readAsDataURL(file);
+      console.log("readAsDataURL called successfully");
+    } catch (error) {
+      console.error("Exception when calling readAsDataURL:", error);
+      toast({
+        title: "파일 읽기 오류",
+        description: "이미지 파일을 읽을 수 없습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCropComplete = (blob: Blob) => {
