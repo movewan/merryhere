@@ -10,15 +10,11 @@ import {
   getExpiringContracts,
   type Contract,
 } from "@/lib/supabase/contracts";
-import { checkAdminPermission } from "@/lib/supabase/admin";
-import { getCurrentUser } from "@/app/auth/actions";
 import { ContractTable } from "@/components/admin/contract-table";
 import { ContractModal } from "@/components/admin/contract-modal";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminContractsPage() {
-  const router = useRouter();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [expiringContracts, setExpiringContracts] = useState<Contract[]>([]);
   const [stats, setStats] = useState({
@@ -33,34 +29,11 @@ export default function AdminContractsPage() {
   const [editingContract, setEditingContract] = useState<Contract | null>(null);
 
   useEffect(() => {
-    checkPermissionAndLoad();
+    loadData();
   }, []);
 
-  const checkPermissionAndLoad = async () => {
-    setLoading(true);
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const isAdmin = await checkAdminPermission(user.id);
-      if (!isAdmin) {
-        router.push("/");
-        return;
-      }
-
-      await loadData();
-    } catch (error) {
-      console.error("Permission check failed:", error);
-      router.push("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadData = async () => {
+    setLoading(true);
     try {
       const [contractsData, expiringData, statsData] = await Promise.all([
         getAllContracts(),
@@ -73,6 +46,8 @@ export default function AdminContractsPage() {
       setStats(statsData);
     } catch (error) {
       console.error("Failed to load contracts:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

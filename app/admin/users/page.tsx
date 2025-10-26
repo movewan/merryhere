@@ -12,15 +12,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowLeft, Search, Users } from "lucide-react";
-import { getAllUsers, checkAdminPermission } from "@/lib/supabase/admin";
-import { getCurrentUser } from "@/app/auth/actions";
+import { getAllUsers } from "@/lib/supabase/admin";
 import type { Profile } from "@/lib/supabase/database.types";
 import { UserTable } from "@/components/admin/user-table";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminUsersPage() {
-  const router = useRouter();
   const [users, setUsers] = useState<Profile[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,43 +26,22 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState<string>("all");
 
   useEffect(() => {
-    checkPermissionAndLoad();
+    loadUsers();
   }, []);
 
   useEffect(() => {
     applyFilters();
   }, [users, search, userTypeFilter, roleFilter]);
 
-  const checkPermissionAndLoad = async () => {
-    setLoading(true);
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const isAdmin = await checkAdminPermission(user.id);
-      if (!isAdmin) {
-        router.push("/");
-        return;
-      }
-
-      await loadUsers();
-    } catch (error) {
-      console.error("Permission check failed:", error);
-      router.push("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadUsers = async () => {
+    setLoading(true);
     try {
       const data = await getAllUsers();
       setUsers(data);
     } catch (error) {
       console.error("Failed to load users:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

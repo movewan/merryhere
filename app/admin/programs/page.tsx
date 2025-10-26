@@ -5,55 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, Calendar } from "lucide-react";
 import { getPrograms } from "@/lib/supabase/programs";
-import { checkAdminPermission } from "@/lib/supabase/admin";
-import { getCurrentUser } from "@/app/auth/actions";
 import type { Program } from "@/lib/supabase/database.types";
 import { ProgramTable } from "@/components/admin/program-table";
 import { ProgramModal } from "@/components/admin/program-modal";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminProgramsPage() {
-  const router = useRouter();
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
 
   useEffect(() => {
-    checkPermissionAndLoad();
+    loadPrograms();
   }, []);
 
-  const checkPermissionAndLoad = async () => {
-    setLoading(true);
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const isAdmin = await checkAdminPermission(user.id);
-      if (!isAdmin) {
-        router.push("/");
-        return;
-      }
-
-      await loadPrograms();
-    } catch (error) {
-      console.error("Permission check failed:", error);
-      router.push("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadPrograms = async () => {
+    setLoading(true);
     try {
       const data = await getPrograms();
       setPrograms(data);
     } catch (error) {
       console.error("Failed to load programs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -1,28 +1,7 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/app/auth/actions";
 import { getDashboardStats } from "@/lib/supabase/admin";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
-import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminPage() {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/auth/login");
-  }
-
-  // Check admin permission using server client
-  const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile || profile.role !== "admin") {
-    redirect("/");
-  }
-
   const stats = await getDashboardStats();
 
   return (

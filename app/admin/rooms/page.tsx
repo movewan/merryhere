@@ -5,55 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Plus, DoorOpen } from "lucide-react";
 import { getMeetingRooms } from "@/lib/supabase/rooms";
-import { checkAdminPermission } from "@/lib/supabase/admin";
-import { getCurrentUser } from "@/app/auth/actions";
 import type { MeetingRoom } from "@/lib/supabase/database.types";
 import { RoomTable } from "@/components/admin/room-table";
 import { RoomModal } from "@/components/admin/room-modal";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminRoomsPage() {
-  const router = useRouter();
   const [rooms, setRooms] = useState<MeetingRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState<MeetingRoom | null>(null);
 
   useEffect(() => {
-    checkPermissionAndLoad();
+    loadRooms();
   }, []);
 
-  const checkPermissionAndLoad = async () => {
-    setLoading(true);
-    try {
-      const user = await getCurrentUser();
-      if (!user) {
-        router.push("/auth/login");
-        return;
-      }
-
-      const isAdmin = await checkAdminPermission(user.id);
-      if (!isAdmin) {
-        router.push("/");
-        return;
-      }
-
-      await loadRooms();
-    } catch (error) {
-      console.error("Permission check failed:", error);
-      router.push("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadRooms = async () => {
+    setLoading(true);
     try {
       const data = await getMeetingRooms();
       setRooms(data);
     } catch (error) {
       console.error("Failed to load rooms:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
