@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/app/auth/actions";
-import { getProfile } from "@/lib/supabase/profile";
-import { checkAdminPermission, getDashboardStats } from "@/lib/supabase/admin";
+import { getDashboardStats } from "@/lib/supabase/admin";
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminPage() {
   const user = await getCurrentUser();
@@ -11,10 +11,15 @@ export default async function AdminPage() {
     redirect("/auth/login");
   }
 
-  const profile = await getProfile(user.id);
-  const isAdmin = await checkAdminPermission(user.id);
+  // Check admin permission using server client
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
-  if (!isAdmin || profile?.role !== "admin") {
+  if (!profile || profile.role !== "admin") {
     redirect("/");
   }
 

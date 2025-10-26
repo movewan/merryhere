@@ -54,7 +54,6 @@ export function UserTable({ users, onUpdate }: UserTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>이름</TableHead>
-              <TableHead>이메일</TableHead>
               <TableHead>회원 유형</TableHead>
               <TableHead>역할</TableHead>
               <TableHead>개인 포인트</TableHead>
@@ -67,9 +66,6 @@ export function UserTable({ users, onUpdate }: UserTableProps) {
             {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.full_name}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {user.email || "-"}
-                </TableCell>
                 <TableCell>
                   <span
                     className={`rounded-full px-2 py-1 text-xs ${

@@ -29,7 +29,7 @@ export function RoomModal({ room, onClose, onUpdate }: RoomModalProps) {
 
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
-  const [pointsPerHour, setPointsPerHour] = useState("");
+  const [pointsPer30Min, setPointsPer30Min] = useState("");
   const [description, setDescription] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [amenityInput, setAmenityInput] = useState("");
@@ -38,7 +38,7 @@ export function RoomModal({ room, onClose, onUpdate }: RoomModalProps) {
     if (room) {
       setName(room.name);
       setCapacity(room.capacity.toString());
-      setPointsPerHour(room.points_per_hour.toString());
+      setPointsPer30Min(room.points_per_30min.toString());
       setDescription(room.description || "");
       setAmenities(room.amenities || []);
     }
@@ -57,7 +57,7 @@ export function RoomModal({ room, onClose, onUpdate }: RoomModalProps) {
 
   const handleSave = async () => {
     const capacityNum = parseInt(capacity);
-    const pointsNum = parseInt(pointsPerHour);
+    const pointsNum = parseInt(pointsPer30Min);
 
     if (!name.trim()) {
       toast({
@@ -90,10 +90,14 @@ export function RoomModal({ room, onClose, onUpdate }: RoomModalProps) {
     try {
       const roomData = {
         name: name.trim(),
+        floor: 1,
         capacity: capacityNum,
-        points_per_hour: pointsNum,
+        points_per_30min: pointsNum,
+        min_booking_duration: 30,
+        max_booking_duration: 480,
         description: description.trim() || null,
         amenities: amenities.length > 0 ? amenities : null,
+        image_url: null,
         is_active: true,
       };
 
@@ -157,12 +161,12 @@ export function RoomModal({ room, onClose, onUpdate }: RoomModalProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="points">시간당 포인트 *</Label>
+              <Label htmlFor="points">30분당 포인트 *</Label>
               <Input
                 id="points"
                 type="number"
-                value={pointsPerHour}
-                onChange={(e) => setPointsPerHour(e.target.value)}
+                value={pointsPer30Min}
+                onChange={(e) => setPointsPer30Min(e.target.value)}
                 placeholder="1000"
                 min="0"
               />

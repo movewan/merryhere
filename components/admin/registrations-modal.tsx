@@ -37,7 +37,6 @@ interface Registration {
   registered_at: string;
   profiles: {
     full_name: string;
-    email: string | null;
     phone: string | null;
     company_name: string | null;
   } | null;
@@ -131,7 +130,6 @@ export function RegistrationsModal({ program, onClose, onUpdate }: Registrations
                 <TableHeader>
                   <TableRow>
                     <TableHead>이름</TableHead>
-                    <TableHead>이메일</TableHead>
                     <TableHead>전화번호</TableHead>
                     <TableHead>회사명</TableHead>
                     <TableHead>신청일</TableHead>
@@ -144,9 +142,6 @@ export function RegistrationsModal({ program, onClose, onUpdate }: Registrations
                     <TableRow key={reg.id}>
                       <TableCell className="font-medium">
                         {reg.profiles?.full_name || "-"}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {reg.profiles?.email || "-"}
                       </TableCell>
                       <TableCell className="text-sm">
                         {reg.profiles?.phone || "-"}

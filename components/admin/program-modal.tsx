@@ -34,7 +34,6 @@ export function ProgramModal({ program, onClose, onUpdate }: ProgramModalProps) 
   const [endDatetime, setEndDatetime] = useState("");
   const [registrationDeadline, setRegistrationDeadline] = useState("");
   const [maxParticipants, setMaxParticipants] = useState("");
-  const [location, setLocation] = useState("");
 
   useEffect(() => {
     if (program) {
@@ -52,7 +51,6 @@ export function ProgramModal({ program, onClose, onUpdate }: ProgramModalProps) 
           : ""
       );
       setMaxParticipants(program.max_participants.toString());
-      setLocation(program.location || "");
     }
   }, [program]);
 
@@ -91,15 +89,17 @@ export function ProgramModal({ program, onClose, onUpdate }: ProgramModalProps) 
       const programData = {
         title: title.trim(),
         description: description.trim() || null,
+        detailed_content: null,
         start_datetime: new Date(startDatetime).toISOString(),
         end_datetime: new Date(endDatetime).toISOString(),
         registration_deadline: registrationDeadline
           ? new Date(registrationDeadline).toISOString()
           : null,
         max_participants: maxNum,
-        location: location.trim() || null,
         thumbnail_url: null,
         images: null,
+        is_active: true,
+        created_by: null,
       };
 
       const result = program
@@ -202,16 +202,6 @@ export function ProgramModal({ program, onClose, onUpdate }: ProgramModalProps) 
                 min="1"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="location">장소</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="예: Merry Hall"
-            />
           </div>
         </div>
 

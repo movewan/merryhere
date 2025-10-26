@@ -40,6 +40,7 @@ export default function ProgramDetailPage() {
   const [userId, setUserId] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [canRegister, setCanRegister] = useState<boolean>(false);
 
   useEffect(() => {
     loadData();
@@ -50,6 +51,12 @@ export default function ProgramDetailPage() {
     try {
       const programData = await getProgramById(programId);
       setProgram(programData);
+
+      // Check if program is available for registration
+      if (programData) {
+        const available = await isProgramAvailable(programData);
+        setCanRegister(available);
+      }
 
       const user = await getCurrentUser();
       if (user) {
@@ -185,7 +192,6 @@ export default function ProgramDetailPage() {
   const startDate = parseISO(program.start_datetime);
   const endDate = parseISO(program.end_datetime);
   const isProgramPast = isPast(endDate);
-  const canRegister = isProgramAvailable(program);
   const isRegistered = registration?.status === "registered";
   const isAttended = registration?.status === "attended";
 

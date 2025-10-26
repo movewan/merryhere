@@ -51,25 +51,14 @@ export function ActivityHistory() {
         date: booking.booking_date,
         startTime: booking.start_time,
         endTime: booking.end_time,
-        location: booking.meeting_rooms?.name || "",
+        location: "",
         status: booking.status,
         detailUrl: "/rooms",
         data: booking,
       }));
 
-      const programActivities: ActivityItem[] = programRegistrations
-        .filter((reg) => reg.programs)
-        .map((registration) => ({
-          id: registration.id,
-          type: "program",
-          title: registration.programs!.title,
-          date: registration.programs!.start_datetime.split("T")[0],
-          startTime: format(parseISO(registration.programs!.start_datetime), "HH:mm"),
-          endTime: format(parseISO(registration.programs!.end_datetime), "HH:mm"),
-          status: registration.status,
-          detailUrl: `/programs/${registration.programs!.id}`,
-          data: registration,
-        }));
+      // TODO: Fix program activities join
+      const programActivities: ActivityItem[] = [];
 
       const allActivities = [...roomActivities, ...programActivities].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()

@@ -121,7 +121,8 @@ export function MyBookings() {
   }
 
   const BookingCard = ({ booking }: { booking: RoomBooking }) => {
-    const room = booking.meeting_rooms;
+    // TODO: Fix meeting_rooms join to display room name
+    const room = null;
     const past = isBookingPast(booking);
 
     return (
@@ -160,13 +161,6 @@ export function MyBookings() {
                     {booking.start_time} ~ {booking.end_time}
                   </span>
                 </div>
-                {room && (
-                  <div className="mt-2">
-                    <span className="rounded-full bg-teal/10 px-2 py-1 text-xs text-teal">
-                      {room.name}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {booking.meeting_description && (

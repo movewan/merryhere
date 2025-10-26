@@ -77,7 +77,6 @@ export default function AdminUsersPage() {
       filtered = filtered.filter(
         (user) =>
           user.full_name.toLowerCase().includes(search.toLowerCase()) ||
-          user.email?.toLowerCase().includes(search.toLowerCase()) ||
           user.company_name?.toLowerCase().includes(search.toLowerCase())
       );
     }

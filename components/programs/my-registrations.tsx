@@ -80,23 +80,12 @@ export function MyRegistrations() {
     }
   };
 
-  const isProgramPast = (registration: ProgramRegistration): boolean => {
-    if (!registration.programs) return false;
-    try {
-      const endDate = parseISO(registration.programs.end_datetime);
-      return isPast(endDate);
-    } catch {
-      return false;
-    }
-  };
-
+  // TODO: Fix programs join query to enable proper filtering
   const upcomingRegistrations = registrations.filter(
-    (r) => r.status === "registered" && !isProgramPast(r)
+    (r) => r.status === "registered"
   );
   const pastRegistrations = registrations.filter(
-    (r) =>
-      (r.status === "registered" && isProgramPast(r)) ||
-      r.status === "attended"
+    (r) => r.status === "attended"
   );
   const cancelledRegistrations = registrations.filter(
     (r) => r.status === "cancelled"
@@ -127,88 +116,8 @@ export function MyRegistrations() {
   }
 
   const RegistrationCard = ({ registration }: { registration: ProgramRegistration }) => {
-    const program = registration.programs;
-    if (!program) return null;
-
-    const startDate = parseISO(program.start_datetime);
-    const endDate = parseISO(program.end_datetime);
-    const past = isProgramPast(registration);
-    const canCancel = !past && registration.status === "registered";
-
-    return (
-      <Card className={registration.status === "cancelled" ? "opacity-60" : ""}>
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="mb-2 flex items-center gap-2">
-                <h4 className="font-bold">{program.title}</h4>
-                {registration.status === "cancelled" && (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
-                    취소됨
-                  </span>
-                )}
-                {registration.status === "attended" && (
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
-                    참석 완료
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>
-                    {format(startDate, "yyyy년 M월 d일 (E)", { locale: ko })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>
-                    {format(startDate, "HH:mm")} ~ {format(endDate, "HH:mm")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span>
-                    {program.current_participants} / {program.max_participants}명
-                  </span>
-                </div>
-              </div>
-
-              {program.description && (
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                  {program.description}
-                </p>
-              )}
-
-              <div className="mt-3">
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="text-teal hover:bg-teal/10"
-                >
-                  <Link href={`/programs/${program.id}`}>상세 보기 →</Link>
-                </Button>
-              </div>
-            </div>
-
-            {/* 취소 버튼 */}
-            {canCancel && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleCancel(program.id, registration.id)}
-                disabled={cancellingId === registration.id}
-                className="text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
+    // TODO: Fix programs join to display program details
+    return null;
   };
 
   return (

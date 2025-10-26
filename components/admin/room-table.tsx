@@ -79,7 +79,7 @@ export function RoomTable({ rooms, onEdit, onUpdate }: RoomTableProps) {
               <TableCell className="font-medium">{room.name}</TableCell>
               <TableCell>{room.capacity}명</TableCell>
               <TableCell className="font-semibold">
-                {room.points_per_hour.toLocaleString()}P
+                {room.points_per_30min.toLocaleString()}P/30분
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">

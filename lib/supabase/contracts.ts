@@ -231,18 +231,18 @@ export async function updateContractStatus(
       return { success: false, error: error.message };
     }
 
-    // 히스토리 기록
-    if (contract) {
-      const user = await supabase.auth.getUser();
-      await supabase.from("contract_history").insert({
-        contract_id: contractId,
-        changed_by: user.data.user?.id,
-        change_type: "status_change",
-        previous_value: { status: contract.contract_status },
-        new_value: { status },
-        notes: notes || `상태 변경: ${contract.contract_status} → ${status}`,
-      });
-    }
+    // TODO: 히스토리 기록 (contract_history 테이블 생성 후 활성화)
+    // if (contract) {
+    //   const user = await supabase.auth.getUser();
+    //   await supabase.from("contract_history").insert({
+    //     contract_id: contractId,
+    //     changed_by: user.data.user?.id,
+    //     change_type: "status_change",
+    //     previous_value: { status: contract.contract_status },
+    //     new_value: { status },
+    //     notes: notes || `상태 변경: ${contract.contract_status} → ${status}`,
+    //   });
+    // }
 
     return { success: true };
   } catch (error) {

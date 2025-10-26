@@ -123,7 +123,7 @@ export async function getAllUsers(params?: {
   }
 
   if (params?.role) {
-    query = query.eq("role", params.role);
+    query = query.eq("role", params.role as any);
   }
 
   if (params?.search) {
@@ -163,7 +163,7 @@ export async function updateUserAsAdmin(
       .update({
         ...updates,
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .eq("id", userId);
 
     if (error) {

@@ -82,11 +82,6 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>이메일</Label>
-            <div className="text-sm text-muted-foreground">{user.email}</div>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="user-type">회원 유형</Label>
             <Select value={userType} onValueChange={(v) => setUserType(v as "general" | "tenant")}>
               <SelectTrigger id="user-type">
@@ -101,7 +96,7 @@ export function EditUserModal({ user, onClose, onUpdate }: EditUserModalProps) {
 
           <div className="space-y-2">
             <Label htmlFor="role">역할</Label>
-            <Select value={role} onValueChange={setRole}>
+            <Select value={role} onValueChange={(v) => setRole(v as typeof role)}>
               <SelectTrigger id="role">
                 <SelectValue />
               </SelectTrigger>
