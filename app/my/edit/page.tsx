@@ -84,12 +84,17 @@ export default function EditProfilePage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("=== handleImageChange called ===");
 
-    const file = e.target.files?.[0];
-    if (!file) {
+    // React 합성 이벤트 유지
+    e.persist?.();
+
+    const files = e.target.files;
+    if (!files || files.length === 0) {
       console.log("No file selected");
       return;
     }
 
+    // File 객체를 즉시 복사 (참조 유지를 위해)
+    const file = files[0];
     console.log("File selected:", {
       name: file.name,
       type: file.type,
@@ -124,9 +129,13 @@ export default function EditProfilePage() {
     // File 객체를 저장 (참조 유지)
     setSelectedFile(file);
 
-    // FileReader로 Data URL 생성
-    const reader = new FileReader();
-    console.log("FileReader created");
+    // 약간의 지연 후 파일 읽기 시작 (이벤트 처리 완료 대기)
+    setTimeout(() => {
+      console.log("Starting delayed file read");
+
+      // FileReader로 Data URL 생성
+      const reader = new FileReader();
+      console.log("FileReader created");
 
     reader.onloadstart = () => {
       console.log("FileReader: onloadstart");
@@ -157,15 +166,27 @@ export default function EditProfilePage() {
 
     reader.onerror = (e) => {
       console.error("FileReader: onerror");
-      console.error("Error details:", {
-        error: reader.error,
-        errorName: reader.error?.name,
-        errorMessage: reader.error?.message,
-        event: e
+      console.error("Error object:", reader.error);
+
+      // 에러 정보를 가능한 모든 방법으로 출력
+      if (reader.error) {
+        console.error("Error.name:", reader.error.name);
+        console.error("Error.message:", reader.error.message);
+        console.error("Error.code:", (reader.error as any).code);
+        console.error("Error stringified:", JSON.stringify(reader.error, null, 2));
+      }
+
+      console.error("Event:", e);
+      console.error("Event type:", e.type);
+      console.error("File info at error:", {
+        name: file.name,
+        size: file.size,
+        type: file.type
       });
+
       toast({
         title: "파일 읽기 오류",
-        description: "이미지 파일을 읽을 수 없습니다.",
+        description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.name || '알 수 없는 오류'})`,
         variant: "destructive",
       });
       setSelectedFile(null);
@@ -179,18 +200,19 @@ export default function EditProfilePage() {
       console.log("FileReader: onloadend (always called)");
     };
 
-    try {
-      console.log("Starting readAsDataURL...");
-      reader.readAsDataURL(file);
-      console.log("readAsDataURL called successfully");
-    } catch (error) {
-      console.error("Exception when calling readAsDataURL:", error);
-      toast({
-        title: "파일 읽기 오류",
-        description: "이미지 파일을 읽을 수 없습니다.",
-        variant: "destructive",
-      });
-    }
+      try {
+        console.log("Starting readAsDataURL...");
+        reader.readAsDataURL(file);
+        console.log("readAsDataURL called successfully");
+      } catch (error) {
+        console.error("Exception when calling readAsDataURL:", error);
+        toast({
+          title: "파일 읽기 오류",
+          description: "이미지 파일을 읽을 수 없습니다.",
+          variant: "destructive",
+        });
+      }
+    }, 50); // 50ms 지연
   };
 
   const handleCropComplete = (blob: Blob) => {
