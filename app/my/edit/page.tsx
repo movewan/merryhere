@@ -39,6 +39,7 @@ export default function EditProfilePage() {
   // 이미지 크롭 관련
   const [showCropModal, setShowCropModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
 
   // 비밀번호 변경 데이터
@@ -101,7 +102,6 @@ export default function EditProfilePage() {
         description: "이미지 파일만 업로드 가능합니다.",
         variant: "destructive",
       });
-      e.target.value = ""; // Reset input
       return;
     }
 
@@ -113,44 +113,34 @@ export default function EditProfilePage() {
         description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
         variant: "destructive",
       });
-      e.target.value = ""; // Reset input
       return;
     }
 
-    try {
-      // URL.createObjectURL 방식으로 변경 (권한 문제 해결)
-      const imageUrl = URL.createObjectURL(file);
-      console.log("Image URL created:", imageUrl);
+    // File 객체를 저장 (참조 유지)
+    setSelectedFile(file);
 
-      // 이미지가 로드되었는지 확인한 후 모달 표시
-      const img = new Image();
-      img.onload = () => {
-        console.log("Image loaded successfully, showing modal");
-        setSelectedImage(imageUrl);
+    // FileReader로 Data URL 생성
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      console.log("File loaded successfully");
+      if (reader.result) {
+        setSelectedImage(reader.result as string);
         setShowCropModal(true);
-        // 파일 선택 완료 후 input 리셋 (같은 파일 재선택 가능하도록)
-        e.target.value = "";
-      };
-      img.onerror = (error) => {
-        console.error("Image load error:", error);
-        URL.revokeObjectURL(imageUrl);
-        toast({
-          title: "이미지 로드 오류",
-          description: "이미지를 불러올 수 없습니다.",
-          variant: "destructive",
-        });
-        e.target.value = "";
-      };
-      img.src = imageUrl;
-    } catch (error) {
-      console.error("Error creating object URL:", error);
+      }
+    };
+
+    reader.onerror = () => {
+      console.error("FileReader error:", reader.error);
       toast({
         title: "파일 읽기 오류",
         description: "이미지 파일을 읽을 수 없습니다.",
         variant: "destructive",
       });
-      e.target.value = ""; // Reset input on error
-    }
+      setSelectedFile(null);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleCropComplete = (blob: Blob) => {
@@ -162,17 +152,14 @@ export default function EditProfilePage() {
         URL.revokeObjectURL(previewUrl);
       }
 
-      // 원본 이미지 URL 정리 (크롭 완료 후 더 이상 필요 없음)
-      if (selectedImage && selectedImage.startsWith("blob:")) {
-        URL.revokeObjectURL(selectedImage);
-      }
-
       // 새 미리보기 URL 생성
       const url = URL.createObjectURL(blob);
       setPreviewUrl(url);
 
+      // 모달 닫기 및 상태 초기화
       setShowCropModal(false);
       setSelectedImage(null);
+      setSelectedFile(null);
     } catch (error) {
       console.error("Error handling crop:", error);
       toast({
@@ -497,12 +484,9 @@ export default function EditProfilePage() {
         <ImageCropModal
           image={selectedImage}
           onClose={() => {
-            // Blob URL 메모리 정리
-            if (selectedImage.startsWith("blob:")) {
-              URL.revokeObjectURL(selectedImage);
-            }
             setShowCropModal(false);
             setSelectedImage(null);
+            setSelectedFile(null);
           }}
           onComplete={handleCropComplete}
         />
