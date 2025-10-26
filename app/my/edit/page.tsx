@@ -54,8 +54,16 @@ export default function EditProfilePage() {
 
   // 네이티브 이벤트 리스너 설정 (React의 합성 이벤트 우회)
   useEffect(() => {
+    console.log("=== useEffect for file input running ===");
+    console.log("fileInputRef.current:", fileInputRef.current);
+
     const input = fileInputRef.current;
-    if (!input) return;
+    if (!input) {
+      console.error("fileInputRef.current is null!");
+      return;
+    }
+
+    console.log("Input element found:", input.id, input.type);
 
     const handleNativeChange = (e: Event) => {
       console.log("=== Native change event fired ===");
@@ -127,7 +135,7 @@ export default function EditProfilePage() {
 
     // 네이티브 change 이벤트 리스너 추가
     input.addEventListener('change', handleNativeChange);
-    console.log("Native change event listener added");
+    console.log("✅ Native change event listener added successfully");
 
     return () => {
       input.removeEventListener('change', handleNativeChange);
