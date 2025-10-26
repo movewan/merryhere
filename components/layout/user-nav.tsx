@@ -79,14 +79,13 @@ export function UserNav({ user, profile }: UserNavProps) {
           <Link href="/programs">프로그램</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-red-600 focus:text-red-600 cursor-pointer"
-          onSelect={(e) => {
-            e.preventDefault();
-            handleLogout();
-          }}
-        >
-          로그아웃
+        <DropdownMenuItem asChild>
+          <button
+            onClick={handleLogout}
+            className="w-full text-red-600 focus:text-red-600"
+          >
+            로그아웃
+          </button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
