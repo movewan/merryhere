@@ -82,10 +82,20 @@ export default function EditProfilePage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+
+    console.log("File selected:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
 
     // 파일 타입 체크
     if (!file.type.startsWith("image/")) {
+      console.error("Invalid file type:", file.type);
       toast({
         title: "파일 형식 오류",
         description: "이미지 파일만 업로드 가능합니다.",
@@ -96,6 +106,7 @@ export default function EditProfilePage() {
 
     // 파일 크기 체크 (5MB)
     if (file.size > 5 * 1024 * 1024) {
+      console.error("File size too large:", file.size);
       toast({
         title: "파일 크기 초과",
         description: "이미지 파일은 최대 5MB까지 업로드 가능합니다.",
@@ -104,27 +115,35 @@ export default function EditProfilePage() {
       return;
     }
 
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      console.log("File loaded successfully");
+      if (reader.result) {
+        setSelectedImage(reader.result as string);
+        setShowCropModal(true);
+      } else {
+        console.error("No result from FileReader");
+      }
+    };
+
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error, reader.error);
+      toast({
+        title: "파일 읽기 오류",
+        description: `이미지 파일을 읽을 수 없습니다. (${reader.error?.message || "알 수 없는 오류"})`,
+        variant: "destructive",
+      });
+    };
+
+    reader.onabort = () => {
+      console.error("FileReader aborted");
+    };
+
     try {
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        if (reader.result) {
-          setSelectedImage(reader.result as string);
-          setShowCropModal(true);
-        }
-      };
-
-      reader.onerror = () => {
-        toast({
-          title: "파일 읽기 오류",
-          description: "이미지 파일을 읽을 수 없습니다.",
-          variant: "destructive",
-        });
-      };
-
       reader.readAsDataURL(file);
     } catch (error) {
-      console.error("Error reading file:", error);
+      console.error("Error starting FileReader:", error);
       toast({
         title: "파일 읽기 오류",
         description: "이미지 파일을 읽을 수 없습니다.",
