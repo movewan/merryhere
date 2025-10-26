@@ -17,7 +17,9 @@ export async function POST(request: Request) {
     const { type, data } = body;
 
     // 이메일 수신자 주소
-    const recipientEmail = "merryhere@mysc.co.kr";
+    // TODO: Resend에서 merryhere@mysc.co.kr 이메일 검증 완료 후 변경
+    // 검증 방법: Resend Dashboard > Emails > Add Email
+    const recipientEmail = "move@nestand.kr";
 
     let emailContent = {
       // 발신자 주소
