@@ -20,9 +20,10 @@ export async function POST(request: Request) {
     const recipientEmail = "merryhere@mysc.co.kr";
 
     let emailContent = {
-      // 발신자 주소 (Resend 도메인 검증 필요: https://resend.com/domains)
-      // mysc.co.kr 도메인 검증이 완료되면 정상 작동
-      from: "MERRYHERE <merryhere@mysc.co.kr>",
+      // 발신자 주소
+      // TODO: Resend에서 mysc.co.kr 도메인 검증 완료 시 merryhere@mysc.co.kr로 변경
+      // 도메인 검증 방법: https://resend.com/domains
+      from: "MERRYHERE <onboarding@resend.dev>",
       to: recipientEmail,
       subject: "",
       html: "",
