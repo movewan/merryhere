@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,6 @@ interface UserNavProps {
 }
 
 export function UserNav({ user, profile }: UserNavProps) {
-  const router = useRouter();
-
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -31,12 +28,6 @@ export function UserNav({ user, profile }: UserNavProps) {
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/");
-    router.refresh();
   };
 
   return (
