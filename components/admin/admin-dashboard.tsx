@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { FinanceDashboard } from "./finance-dashboard";
 
 interface AdminDashboardProps {
   stats: {
@@ -169,6 +170,11 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
             </Card>
           ))}
         </div>
+      </div>
+
+      {/* 재무 현황 */}
+      <div>
+        <FinanceDashboard />
       </div>
     </div>
   );
