@@ -148,10 +148,37 @@ export async function getAllUsers(params?: {
 export async function updateUserAsAdmin(
   userId: string,
   updates: {
+    // 기본 정보
+    full_name?: string;
+    phone?: string | null;
+    birth_date?: string | null;
+    sns_url?: string | null;
+    profile_image_url?: string | null;
+
+    // 회원 유형 및 역할
     user_type?: "general" | "tenant";
     role?: string;
+
+    // 회사 정보
+    company_name?: string | null;
+    ceo_name?: string | null;
+    business_type?: string | null;
+    business_start_date?: string | null;
+    business_registration_number?: string | null;
+
+    // 직무
+    job_types?: string[] | null;
+
+    // 파일 URL
+    business_registration_url?: string | null;
+    business_account_url?: string | null;
+    company_logo_url?: string | null;
+
+    // 포인트
     personal_points?: number;
     team_points?: number;
+
+    // 상태
     is_active?: boolean;
   }
 ): Promise<{ success: boolean; error?: string }> {
