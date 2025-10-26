@@ -16,12 +16,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, data } = body;
 
-    // TODO: 프로덕션 배포 시 merryhere@mysc.co.kr로 변경 필요
-    // Resend 도메인 검증 후 변경: https://resend.com/domains
-    const recipientEmail = "move@nestand.kr"; // 테스트용 검증된 이메일
+    // 이메일 수신자 주소
+    const recipientEmail = "merryhere@mysc.co.kr";
 
     let emailContent = {
-      from: "MERRYHERE <onboarding@resend.dev>", // Resend 검증된 도메인 필요
+      // 발신자 주소 (Resend 도메인 검증 필요: https://resend.com/domains)
+      // mysc.co.kr 도메인 검증이 완료되면 정상 작동
+      from: "MERRYHERE <merryhere@mysc.co.kr>",
       to: recipientEmail,
       subject: "",
       html: "",
