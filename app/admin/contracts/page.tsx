@@ -12,6 +12,7 @@ import {
 } from "@/lib/supabase/contracts";
 import { ContractTable } from "@/components/admin/contract-table";
 import { ContractModal } from "@/components/admin/contract-modal";
+import { FinanceDashboard } from "@/components/admin/finance-dashboard";
 import Link from "next/link";
 
 export default function AdminContractsPage() {
@@ -163,41 +164,81 @@ export default function AdminContractsPage() {
           </Card>
         </div>
 
-        {/* 만료 예정 알림 */}
+        {/* 만료 예정 알림 (개선된 버전) */}
         {expiringContracts.length > 0 && (
           <Card className="mb-6 border-orange-200 bg-orange-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-orange-700">
                 <AlertCircle className="h-5 w-5" />
-                만료 예정 계약 ({expiringContracts.length}건)
+                계약 만료 알림
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* 서포트 메시지 */}
+              <div className="rounded-lg bg-white p-4 border-l-4 border-orange-400">
+                <p className="font-semibold text-orange-800">
+                  💡 3개월 후 {expiringContracts.length}팀 계약 종료 예정입니다.
+                </p>
+                <p className="text-sm text-orange-700 mt-1">
+                  미리 계약 연장 여부 확인해보세요.
+                </p>
+              </div>
+
+              {/* 계약 목록 */}
               <div className="space-y-2">
-                {expiringContracts.map((contract) => (
-                  <div
-                    key={contract.id}
-                    className="flex items-center justify-between rounded-lg bg-white p-3"
-                  >
-                    <div>
-                      <div className="font-semibold">{contract.company_name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {contract.room_number} · {contract.end_date}까지
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(contract)}
+                {expiringContracts.map((contract) => {
+                  const endDate = new Date(contract.end_date || "");
+                  const today = new Date();
+                  const daysLeft = Math.ceil(
+                    (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+                  );
+                  const isUrgent = daysLeft <= 30;
+
+                  return (
+                    <div
+                      key={contract.id}
+                      className={`flex items-center justify-between rounded-lg p-3 ${
+                        isUrgent ? "bg-red-100 border border-red-300" : "bg-white"
+                      }`}
                     >
-                      상세보기
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{contract.company_name}</span>
+                          <span
+                            className={`text-xs font-medium px-2 py-1 rounded-full ${
+                              isUrgent
+                                ? "bg-red-500 text-white"
+                                : "bg-orange-500 text-white"
+                            }`}
+                          >
+                            D-{daysLeft}
+                          </span>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {contract.room_number} · {contract.end_date}까지 · 담당자:{" "}
+                          {contract.contact_person || "-"} ({contract.contact_phone || "-"})
+                        </div>
+                      </div>
+                      <Button
+                        variant={isUrgent ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => handleEdit(contract)}
+                        className={isUrgent ? "bg-red-600 hover:bg-red-700" : ""}
+                      >
+                        상세보기
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         )}
+
+        {/* 재무 대시보드 */}
+        <div className="mb-6">
+          <FinanceDashboard />
+        </div>
 
         {/* 계약 목록 */}
         <Card>

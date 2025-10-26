@@ -255,22 +255,22 @@ export async function updateContractStatus(
 }
 
 /**
- * 곧 만료될 계약 조회 (D-30 이내)
+ * 곧 만료될 계약 조회 (D-90 이내)
  */
 export async function getExpiringContracts(): Promise<Contract[]> {
   const supabase = createClient();
 
   const today = new Date();
-  const thirtyDaysLater = new Date();
-  thirtyDaysLater.setDate(today.getDate() + 30);
+  const ninetyDaysLater = new Date();
+  ninetyDaysLater.setDate(today.getDate() + 90);
 
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from("contracts")
     .select("*")
     .eq("contract_status", "active")
     .not("end_date", "is", null)
     .gte("end_date", today.toISOString().split("T")[0])
-    .lte("end_date", thirtyDaysLater.toISOString().split("T")[0])
+    .lte("end_date", ninetyDaysLater.toISOString().split("T")[0])
     .order("end_date");
 
   if (error) {
