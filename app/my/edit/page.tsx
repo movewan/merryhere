@@ -122,11 +122,26 @@ export default function EditProfilePage() {
       const imageUrl = URL.createObjectURL(file);
       console.log("Image URL created:", imageUrl);
 
-      setSelectedImage(imageUrl);
-      setShowCropModal(true);
-
-      // 파일 선택 완료 후 input 리셋 (같은 파일 재선택 가능하도록)
-      e.target.value = "";
+      // 이미지가 로드되었는지 확인한 후 모달 표시
+      const img = new Image();
+      img.onload = () => {
+        console.log("Image loaded successfully, showing modal");
+        setSelectedImage(imageUrl);
+        setShowCropModal(true);
+        // 파일 선택 완료 후 input 리셋 (같은 파일 재선택 가능하도록)
+        e.target.value = "";
+      };
+      img.onerror = (error) => {
+        console.error("Image load error:", error);
+        URL.revokeObjectURL(imageUrl);
+        toast({
+          title: "이미지 로드 오류",
+          description: "이미지를 불러올 수 없습니다.",
+          variant: "destructive",
+        });
+        e.target.value = "";
+      };
+      img.src = imageUrl;
     } catch (error) {
       console.error("Error creating object URL:", error);
       toast({

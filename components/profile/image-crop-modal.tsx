@@ -96,6 +96,8 @@ export function ImageCropModal({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
 
+  console.log("ImageCropModal rendering with image:", image);
+
   const onCropComplete = useCallback(
     (croppedArea: Area, croppedAreaPixels: Area) => {
       setCroppedAreaPixels(croppedAreaPixels);
@@ -137,6 +139,8 @@ export function ImageCropModal({
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
+            objectFit="contain"
+            showGrid={false}
           />
         </div>
 
