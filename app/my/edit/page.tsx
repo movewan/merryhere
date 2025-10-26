@@ -120,22 +120,14 @@ export default function EditProfilePage() {
       return;
     }
 
-    console.log("Validation passed, loading file into memory...");
+    console.log("Validation passed, starting FileReader immediately...");
 
-    // 파일 데이터를 완전히 메모리로 로드 (비동기)
-    file.arrayBuffer().then((buffer) => {
-      console.log("ArrayBuffer loaded, size:", buffer.byteLength);
+    // 원본 File 객체를 저장
+    setSelectedFile(file);
 
-      // ArrayBuffer에서 새로운 Blob 생성 (원본 파일과 완전 독립)
-      const fileBlob = new Blob([buffer], { type: file.type });
-      console.log("Blob created from ArrayBuffer, size:", fileBlob.size, "type:", fileBlob.type);
-
-      // 원본 File 객체를 저장 (참조 유지)
-      setSelectedFile(file);
-
-      // FileReader로 Data URL 생성 (Blob 사용)
-      const reader = new FileReader();
-      console.log("FileReader created");
+    // FileReader를 즉시 시작 (onChange 핸들러 내에서 동기적으로)
+    const reader = new FileReader();
+    console.log("FileReader created");
 
     reader.onloadstart = () => {
       console.log("FileReader: onloadstart");
@@ -184,9 +176,10 @@ export default function EditProfilePage() {
 
       console.error("Event:", e);
       console.error("Event type:", e.type);
-      console.error("Blob info at error:", {
-        size: fileBlob.size,
-        type: fileBlob.type
+      console.error("File info at error:", {
+        name: file.name,
+        size: file.size,
+        type: file.type
       });
 
       toast({
@@ -205,26 +198,18 @@ export default function EditProfilePage() {
       console.log("FileReader: onloadend (always called)");
     };
 
-      try {
-        console.log("Starting readAsDataURL on Blob...");
-        reader.readAsDataURL(fileBlob);
-        console.log("readAsDataURL called successfully");
-      } catch (error) {
-        console.error("Exception when calling readAsDataURL:", error);
-        toast({
-          title: "파일 읽기 오류",
-          description: "이미지 파일을 읽을 수 없습니다.",
-          variant: "destructive",
-        });
-      }
-    }).catch((error) => {
-      console.error("Error reading file to ArrayBuffer:", error);
+    try {
+      console.log("Starting readAsDataURL on File directly...");
+      reader.readAsDataURL(file);
+      console.log("readAsDataURL called successfully");
+    } catch (error) {
+      console.error("Exception when calling readAsDataURL:", error);
       toast({
         title: "파일 읽기 오류",
-        description: "파일을 메모리로 로드할 수 없습니다.",
+        description: "이미지 파일을 읽을 수 없습니다.",
         variant: "destructive",
       });
-    });
+    }
   };
 
   const handleCropComplete = (blob: Blob) => {
