@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, DoorOpen } from "lucide-react";
+import { ArrowLeft, Plus, DoorOpen, Download } from "lucide-react";
 import { getMeetingRooms } from "@/lib/supabase/rooms";
 import type { MeetingRoom } from "@/lib/supabase/database.types";
 import { RoomTable } from "@/components/admin/room-table";
 import { RoomModal } from "@/components/admin/room-modal";
+import { exportToExcel } from "@/lib/utils/excel";
 import Link from "next/link";
 
 export default function AdminRoomsPage() {
@@ -45,6 +46,23 @@ export default function AdminRoomsPage() {
   const handleUpdate = () => {
     loadRooms();
     handleCloseModal();
+  };
+
+  const handleExportExcel = () => {
+    const excelData = rooms.map((room) => ({
+      회의실명: room.name,
+      설명: room.description || "",
+      수용인원: room.capacity,
+      "포인트(30분당)": room.points_per_30min,
+      최소예약시간: room.min_booking_duration,
+      최대예약시간: room.max_booking_duration,
+      편의시설: room.amenities?.join(", ") || "",
+      상태: room.is_active ? "활성" : "비활성",
+      생성일: new Date(room.created_at).toLocaleDateString("ko-KR"),
+    }));
+
+    const today = new Date().toISOString().split("T")[0];
+    exportToExcel(excelData, `회의실관리_${today}`, "회의실목록");
   };
 
   if (loading) {
@@ -88,10 +106,21 @@ export default function AdminRoomsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DoorOpen className="h-5 w-5" />
-              회의실 목록
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <DoorOpen className="h-5 w-5" />
+                회의실 목록
+              </CardTitle>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                엑셀 다운로드
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <RoomTable rooms={rooms} onEdit={handleEdit} onUpdate={loadRooms} />

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, FileText, AlertCircle } from "lucide-react";
+import { ArrowLeft, Plus, FileText, AlertCircle, Download } from "lucide-react";
 import {
   getAllContracts,
   getContractStatistics,
@@ -13,6 +13,7 @@ import {
 import { ContractTable } from "@/components/admin/contract-table";
 import { ContractModal } from "@/components/admin/contract-modal";
 import { FinanceDashboard } from "@/components/admin/finance-dashboard";
+import { exportToExcel } from "@/lib/utils/excel";
 import Link from "next/link";
 
 export default function AdminContractsPage() {
@@ -65,6 +66,44 @@ export default function AdminContractsPage() {
   const handleUpdate = () => {
     loadData();
     handleCloseModal();
+  };
+
+  const handleExportExcel = () => {
+    const excelData = contracts.map((contract) => ({
+      회사명: contract.company_name,
+      호실: contract.room_number,
+      계약유형: getContractTypeLabel(contract.contract_type),
+      시작일: contract.start_date,
+      종료일: contract.end_date || "",
+      월세: contract.monthly_rent,
+      보증금: contract.deposit,
+      관리비: contract.management_fee,
+      담당자: contract.contact_person || "",
+      연락처: contract.contact_phone || "",
+      상태: getContractStatusLabel(contract.status),
+      생성일: new Date(contract.created_at).toLocaleDateString("ko-KR"),
+    }));
+
+    const today = new Date().toISOString().split("T")[0];
+    exportToExcel(excelData, `계약관리_${today}`, "계약목록");
+  };
+
+  const getContractTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      new: "신규",
+      renewal: "연장",
+      transfer: "양도",
+    };
+    return labels[type] || type;
+  };
+
+  const getContractStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      active: "활성",
+      expired: "만료",
+      terminated: "해지",
+    };
+    return labels[status] || status;
   };
 
   if (loading) {
@@ -243,10 +282,21 @@ export default function AdminContractsPage() {
         {/* 계약 목록 */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              계약 목록
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                계약 목록
+              </CardTitle>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                엑셀 다운로드
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ContractTable

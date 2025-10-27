@@ -6,9 +6,28 @@ import type {
 } from "./database.types";
 
 /**
- * 모든 활성화된 회의실 가져오기
+ * 모든 회의실 가져오기 (관리자용)
  */
 export async function getMeetingRooms(): Promise<MeetingRoom[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("meeting_rooms")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    console.error("Error fetching meeting rooms:", error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+/**
+ * 활성화된 회의실만 가져오기 (사용자용)
+ */
+export async function getActiveMeetingRooms(): Promise<MeetingRoom[]> {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -18,7 +37,7 @@ export async function getMeetingRooms(): Promise<MeetingRoom[]> {
     .order("name");
 
   if (error) {
-    console.error("Error fetching meeting rooms:", error);
+    console.error("Error fetching active meeting rooms:", error);
     throw error;
   }
 

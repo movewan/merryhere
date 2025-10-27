@@ -11,10 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Search, Users } from "lucide-react";
+import { ArrowLeft, Search, Users, Download } from "lucide-react";
 import { getAllUsers } from "@/lib/supabase/admin";
 import type { Profile } from "@/lib/supabase/database.types";
 import { UserTable } from "@/components/admin/user-table";
+import { exportToExcel } from "@/lib/utils/excel";
 import Link from "next/link";
 
 export default function AdminUsersPage() {
@@ -70,6 +71,36 @@ export default function AdminUsersPage() {
     setFilteredUsers(filtered);
   };
 
+  const handleExportExcel = () => {
+    const excelData = filteredUsers.map((user) => ({
+      이름: user.full_name,
+      이메일: user.email,
+      전화번호: user.phone || "",
+      회원유형: user.user_type === "tenant" ? "입주 회원" : "일반 회원",
+      역할: getRoleLabel(user.role),
+      회사명: user.company_name || "",
+      대표자명: user.ceo_name || "",
+      개인포인트: user.personal_points,
+      팀포인트: user.team_points,
+      활성상태: user.is_active ? "활성" : "비활성",
+      가입일: new Date(user.created_at).toLocaleDateString("ko-KR"),
+    }));
+
+    const today = new Date().toISOString().split("T")[0];
+    exportToExcel(excelData, `회원관리_${today}`, "회원목록");
+  };
+
+  const getRoleLabel = (role: string) => {
+    const roleLabels: Record<string, string> = {
+      admin: "관리자",
+      tenant_leader: "팀 리더",
+      tenant_manager: "매니저",
+      tenant_member: "팀원",
+      general: "일반 회원",
+    };
+    return roleLabels[role] || role;
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen py-8">
@@ -104,10 +135,21 @@ export default function AdminUsersPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              회원 목록
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                회원 목록
+              </CardTitle>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                엑셀 다운로드
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {/* 필터 */}

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Coins, Clock } from "lucide-react";
-import { getMeetingRooms } from "@/lib/supabase/rooms";
+import { getActiveMeetingRooms } from "@/lib/supabase/rooms";
 import type { MeetingRoom } from "@/lib/supabase/database.types";
 
 interface RoomListProps {
@@ -22,7 +22,7 @@ export function RoomList({ selectedRoomId, onSelectRoom }: RoomListProps) {
 
   const loadRooms = async () => {
     try {
-      const data = await getMeetingRooms();
+      const data = await getActiveMeetingRooms();
       setRooms(data);
       // 첫 번째 방을 기본 선택
       if (data.length > 0 && !selectedRoomId) {

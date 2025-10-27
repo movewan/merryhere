@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, TrendingDown, Calendar } from "lucide-react";
+import { ArrowLeft, Plus, TrendingDown, Calendar, Download } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ import {
 } from "@/lib/supabase/expenses";
 import { ExpenseTable } from "@/components/admin/expense-table";
 import { ExpenseModal } from "@/components/admin/expense-modal";
+import { exportToExcel } from "@/lib/utils/excel";
 import Link from "next/link";
 
 export default function AdminExpensesPage() {
@@ -75,6 +76,30 @@ export default function AdminExpensesPage() {
   const handleUpdate = () => {
     loadData();
     handleCloseModal();
+  };
+
+  const handleExportExcel = () => {
+    const excelData = expenses.map((expense) => ({
+      카테고리: expenseCategoryLabels[expense.category as ExpenseCategory],
+      금액: expense.amount,
+      지출일: expense.expense_date,
+      설명: expense.description || "",
+      지불방법: getPaymentMethodLabel(expense.payment_method),
+      담당자: expense.handled_by || "",
+      생성일: new Date(expense.created_at).toLocaleDateString("ko-KR"),
+    }));
+
+    exportToExcel(excelData, `지출관리_${year}년`, "지출내역");
+  };
+
+  const getPaymentMethodLabel = (method: string) => {
+    const labels: Record<string, string> = {
+      cash: "현금",
+      card: "카드",
+      transfer: "계좌이체",
+      other: "기타",
+    };
+    return labels[method] || method;
   };
 
   const totalExpenses = Object.values(categoryStats).reduce(
@@ -247,7 +272,18 @@ export default function AdminExpensesPage() {
         {/* 지출 목록 */}
         <Card>
           <CardHeader>
-            <CardTitle>지출 내역</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>지출 내역</CardTitle>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                엑셀 다운로드
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ExpenseTable

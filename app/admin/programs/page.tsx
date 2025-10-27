@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Calendar } from "lucide-react";
+import { ArrowLeft, Plus, Calendar, Download } from "lucide-react";
 import { getPrograms } from "@/lib/supabase/programs";
 import type { Program } from "@/lib/supabase/database.types";
 import { ProgramTable } from "@/components/admin/program-table";
 import { ProgramModal } from "@/components/admin/program-modal";
+import { exportToExcel } from "@/lib/utils/excel";
 import Link from "next/link";
 
 export default function AdminProgramsPage() {
@@ -45,6 +46,37 @@ export default function AdminProgramsPage() {
   const handleUpdate = () => {
     loadPrograms();
     handleCloseModal();
+  };
+
+  const handleExportExcel = () => {
+    const excelData = programs.map((program) => ({
+      프로그램명: program.title,
+      카테고리: getProgramCategoryLabel(program.category),
+      강사: program.instructor || "",
+      시작일시: new Date(program.start_datetime).toLocaleString("ko-KR"),
+      종료일시: new Date(program.end_datetime).toLocaleString("ko-KR"),
+      장소: program.location || "",
+      정원: program.max_participants,
+      현재신청자: program.current_participants,
+      참가비: program.fee,
+      필요포인트: program.points_required,
+      상태: program.is_active ? "활성" : "비활성",
+      생성일: new Date(program.created_at).toLocaleDateString("ko-KR"),
+    }));
+
+    const today = new Date().toISOString().split("T")[0];
+    exportToExcel(excelData, `프로그램관리_${today}`, "프로그램목록");
+  };
+
+  const getProgramCategoryLabel = (category: string) => {
+    const labels: Record<string, string> = {
+      education: "교육",
+      networking: "네트워킹",
+      mentoring: "멘토링",
+      workshop: "워크샵",
+      other: "기타",
+    };
+    return labels[category] || category;
   };
 
   if (loading) {
@@ -88,10 +120,21 @@ export default function AdminProgramsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              프로그램 목록
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                프로그램 목록
+              </CardTitle>
+              <Button
+                onClick={handleExportExcel}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                엑셀 다운로드
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ProgramTable
