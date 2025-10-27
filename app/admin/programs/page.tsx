@@ -51,32 +51,20 @@ export default function AdminProgramsPage() {
   const handleExportExcel = () => {
     const excelData = programs.map((program) => ({
       프로그램명: program.title,
-      카테고리: getProgramCategoryLabel(program.category),
-      강사: program.instructor || "",
+      설명: program.description || "",
       시작일시: new Date(program.start_datetime).toLocaleString("ko-KR"),
       종료일시: new Date(program.end_datetime).toLocaleString("ko-KR"),
-      장소: program.location || "",
       정원: program.max_participants,
       현재신청자: program.current_participants,
-      참가비: program.fee,
-      필요포인트: program.points_required,
+      신청마감일: program.registration_deadline
+        ? new Date(program.registration_deadline).toLocaleString("ko-KR")
+        : "",
       상태: program.is_active ? "활성" : "비활성",
       생성일: new Date(program.created_at).toLocaleDateString("ko-KR"),
     }));
 
     const today = new Date().toISOString().split("T")[0];
     exportToExcel(excelData, `프로그램관리_${today}`, "프로그램목록");
-  };
-
-  const getProgramCategoryLabel = (category: string) => {
-    const labels: Record<string, string> = {
-      education: "교육",
-      networking: "네트워킹",
-      mentoring: "멘토링",
-      workshop: "워크샵",
-      other: "기타",
-    };
-    return labels[category] || category;
   };
 
   if (loading) {

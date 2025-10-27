@@ -80,26 +80,15 @@ export default function AdminExpensesPage() {
 
   const handleExportExcel = () => {
     const excelData = expenses.map((expense) => ({
+      연도: expense.year,
+      월: expense.month,
       카테고리: expenseCategoryLabels[expense.category as ExpenseCategory],
       금액: expense.amount,
-      지출일: expense.expense_date,
       설명: expense.description || "",
-      지불방법: getPaymentMethodLabel(expense.payment_method),
-      담당자: expense.handled_by || "",
       생성일: new Date(expense.created_at).toLocaleDateString("ko-KR"),
     }));
 
     exportToExcel(excelData, `지출관리_${year}년`, "지출내역");
-  };
-
-  const getPaymentMethodLabel = (method: string) => {
-    const labels: Record<string, string> = {
-      cash: "현금",
-      card: "카드",
-      transfer: "계좌이체",
-      other: "기타",
-    };
-    return labels[method] || method;
   };
 
   const totalExpenses = Object.values(categoryStats).reduce(

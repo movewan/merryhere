@@ -71,21 +71,33 @@ export default function AdminContractsPage() {
   const handleExportExcel = () => {
     const excelData = contracts.map((contract) => ({
       회사명: contract.company_name,
-      호실: contract.room_number,
-      계약유형: getContractTypeLabel(contract.contract_type),
+      호실: contract.room_number || "",
+      공간유형: getSpaceTypeLabel(contract.space_type),
+      계약유형: getContractTypeLabel(contract.contract_type || ""),
       시작일: contract.start_date,
       종료일: contract.end_date || "",
-      월세: contract.monthly_rent,
+      월세: contract.monthly_fee,
       보증금: contract.deposit,
       관리비: contract.management_fee,
+      월총비용: contract.total_monthly_cost,
       담당자: contract.contact_person || "",
       연락처: contract.contact_phone || "",
-      상태: getContractStatusLabel(contract.status),
+      상태: getContractStatusLabel(contract.contract_status),
       생성일: new Date(contract.created_at).toLocaleDateString("ko-KR"),
     }));
 
     const today = new Date().toISOString().split("T")[0];
     exportToExcel(excelData, `계약관리_${today}`, "계약목록");
+  };
+
+  const getSpaceTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      office: "독립 오피스",
+      fixed_desk: "지정석",
+      flexible_desk: "자유석",
+      non_resident: "비입주 회원",
+    };
+    return labels[type] || type;
   };
 
   const getContractTypeLabel = (type: string) => {
@@ -100,6 +112,7 @@ export default function AdminContractsPage() {
   const getContractStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       active: "활성",
+      pending: "대기",
       expired: "만료",
       terminated: "해지",
     };

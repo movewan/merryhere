@@ -73,16 +73,19 @@ export default function AdminUsersPage() {
 
   const handleExportExcel = () => {
     const excelData = filteredUsers.map((user) => ({
+      ID: user.id,
       이름: user.full_name,
-      이메일: user.email,
       전화번호: user.phone || "",
       회원유형: user.user_type === "tenant" ? "입주 회원" : "일반 회원",
       역할: getRoleLabel(user.role),
       회사명: user.company_name || "",
       대표자명: user.ceo_name || "",
+      사무실유형: user.office_type || "",
+      사무실호수: user.office_number || "",
       개인포인트: user.personal_points,
       팀포인트: user.team_points,
-      활성상태: user.is_active ? "활성" : "비활성",
+      리더여부: user.is_leader ? "예" : "아니오",
+      매니저여부: user.is_manager ? "예" : "아니오",
       가입일: new Date(user.created_at).toLocaleDateString("ko-KR"),
     }));
 
